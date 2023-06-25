@@ -170,5 +170,7 @@ class PrinterBluetoothManager {
   set isPrinting(bool value) => this._isPrinting = value;
   bool get isConnected => this._isConnected;
   set isConnected(bool value) => this._isConnected = value;
+  PrinterBluetooth? get selectedPrinter => this._selectedPrinter;
+  set selectedPrinter(PrinterBluetooth? value) => this._selectedPrinter = value;
   BluetoothManager get bluetoothManager => this._bluetoothManager;
 }
