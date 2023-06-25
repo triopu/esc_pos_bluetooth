@@ -8,7 +8,6 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'package:esc_pos_utils/esc_pos_utils.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:flutter_bluetooth_basic/flutter_bluetooth_basic.dart';
 import './enums.dart';
@@ -35,8 +34,7 @@ class PrinterBluetoothManager {
   final BehaviorSubject<bool> _isScanning = BehaviorSubject.seeded(false);
   Stream<bool> get isScanningStream => _isScanning.stream;
 
-  final BehaviorSubject<List<PrinterBluetooth>> _scanResults =
-      BehaviorSubject.seeded([]);
+  final BehaviorSubject<List<PrinterBluetooth>> _scanResults = BehaviorSubject.seeded([]);
   Stream<List<PrinterBluetooth>> get scanResults => _scanResults.stream;
 
   Future _runDelayed(int seconds) {
@@ -52,8 +50,7 @@ class PrinterBluetoothManager {
       _scanResults.add(devices.map((d) => PrinterBluetooth(d)).toList());
     });
 
-    _isScanningSubscription =
-        _bluetoothManager.isScanning.listen((isScanningCurrent) async {
+    _isScanningSubscription = _bluetoothManager.isScanning.listen((isScanningCurrent) async {
       // If isScanning value changed (scan just stopped)
       if (_isScanning.value! && !isScanningCurrent) {
         _scanResultsSubscription!.cancel();
@@ -65,6 +62,15 @@ class PrinterBluetoothManager {
 
   void stopScan() async {
     await _bluetoothManager.stopScan();
+  }
+
+  Future<PosPrintResult> disconnect() async {
+    try {
+      await _bluetoothManager.disconnect();
+      return Future<PosPrintResult>.value(PosPrintResult.successDisconnect);
+    } catch (e) {
+      return Future<PosPrintResult>.value(PosPrintResult.failedDisconnect);
+    }
   }
 
   void selectPrinter(PrinterBluetooth printer) {
@@ -94,7 +100,11 @@ class PrinterBluetoothManager {
     await _bluetoothManager.stopScan();
 
     // Connect
-    await _bluetoothManager.connect(_selectedPrinter!._device);
+    try {
+      await _bluetoothManager.connect(_selectedPrinter!._device);
+    } catch (e) {
+      return Future<PosPrintResult>.value(PosPrintResult.failedConnect);
+    }
 
     // Subscribe to the events
     _bluetoothManager.state.listen((state) async {
@@ -116,7 +126,6 @@ class PrinterBluetoothManager {
 
             completer.complete(PosPrintResult.success);
           }
-          // TODO sending disconnect signal should be event-based
           _runDelayed(3).then((dynamic v) async {
             await _bluetoothManager.disconnect();
             _isPrinting = false;
@@ -156,4 +165,10 @@ class PrinterBluetoothManager {
       queueSleepTimeMs: queueSleepTimeMs,
     );
   }
+
+  bool get isPrinting => this._isPrinting;
+  set isPrinting(bool value) => this._isPrinting = value;
+  bool get isConnected => this._isConnected;
+  set isConnected(bool value) => this._isConnected = value;
+  BluetoothManager get bluetoothManager => this._bluetoothManager;
 }

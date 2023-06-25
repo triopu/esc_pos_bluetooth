@@ -15,6 +15,10 @@ class PosPrintResult {
   static const ticketEmpty = PosPrintResult._internal(4);
   static const printInProgress = PosPrintResult._internal(5);
   static const scanInProgress = PosPrintResult._internal(6);
+  static const successConnect = PosPrintResult._internal(7);
+  static const failedConnect = PosPrintResult._internal(8);
+  static const successDisconnect = PosPrintResult._internal(9);
+  static const failedDisconnect = PosPrintResult._internal(10);
 
   String get msg {
     if (value == PosPrintResult.success.value) {
@@ -29,6 +33,14 @@ class PosPrintResult {
       return 'Error. Another print in progress';
     } else if (value == PosPrintResult.scanInProgress.value) {
       return 'Error. Printer scanning in progress';
+    } else if (value == PosPrintResult.successConnect.value) {
+      return 'Bluetooth connected';
+    } else if (value == PosPrintResult.failedConnect.value) {
+      return 'Error. Bluetooth failed connected';
+    } else if (value == PosPrintResult.successDisconnect.value) {
+      return 'Bluetooth disconnected';
+    } else if (value == PosPrintResult.failedDisconnect.value) {
+      return 'Error. Bluetooth failed disconnected';
     } else {
       return 'Unknown error';
     }
